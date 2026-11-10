@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>С Днём Рождения, Мам</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Lora', serif;
+            background: #faf7f4;
+            color: #2c2c2c;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        /* === PRELOADER === */
+        .preloader {
+            position: fixed;
+            inset: 0;
+            background: #faf7f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity .8s;
+        }
+
+        .preloader.gone {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .preloader p {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            color: #b8860b;
+            animation: pulse 1.4s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: .4
+            }
+
+            50% {
+                opacity: 1
+            }
+        }
+
+        /* === PETALS === */
+        .petals {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .petal {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(ellipse, #e8b4b8 30%, transparent 70%);
+            border-radius: 50% 0 50% 0;
+            opacity: 0;
+            animation: drift linear infinite;
+        }
+
+        @keyframes drift {
+            0% {
+                transform: translateY(-30px) rotate(0) translateX(0);
+                opacity: 0
+            }
+
+            8% {
+                opacity: .45
+            }
+
+            92% {
+                opacity: .35
+            }
+
+            100% {
+                transform: translateY(105vh) rotate(360deg) translateX(60px);
+                opacity: 0
+            }
+        }
+
+        /* === CONFETTI === */
+        .confetti-wrap {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .conf {
+            position: absolute;
+            top: -16px;
+            width: 8px;
+            height: 14px;
+            border-radius: 2px;
+            opacity: 0;
+            animation: confFall linear forwards;
+        }
+
+        @keyframes confFall {
+            0% {
+                transform: translateY(0) rotate(0);
+                opacity: 1
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(600deg);
+                opacity: 0
+            }
+        }
+
+        /* === SLIDES WRAPPER === */
+        .slides {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 28px 100px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity .6s ease, transform .6s ease;
+            pointer-events: none;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            z-index: 5;
+        }
+
+        .slide.exit-up {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        .slide-inner {
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* === TYPOGRAPHY === */
+        .s-date {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 12px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #b8860b;
+            margin-bottom: 28px;
+        }
+
+        .s-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(28px, 7vw, 52px);
+            font-weight: 400;
+            color: #3a3a3a;
+            line-height: 1.35;
+            margin-bottom: 20px;
+        }
+
+        .s-title em {
+            font-style: italic;
+            color: #c17c74;
+        }
+
+        .s-text {
+            font-size: clamp(15px, 3.8vw, 18px);
+            color: #666;
+            line-height: 1.9;
+            margin-bottom: 16px;
+        }
+
+        .s-text strong {
+            color: #3a3a3a;
+            font-weight: 500;
+        }
+
+        .s-small {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.7;
+            margin-top: 8px;
+        }
+
+        /* === LIST === */
+        .s-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .s-list li {
+            padding: 13px 0;
+            border-bottom: 1px solid #ede8e3;
+            font-size: clamp(14px, 3.5vw, 16px);
+            color: #666;
+            line-height: 1.7;
+        }
+
+        .s-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* === CARDS === */
+        .s-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        @media(max-width:400px) {
+            .s-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .s-card {
+            background: #fff;
+            border: 1px solid #ede8e3;
+            border-radius: 12px;
+            padding: 20px 16px;
+        }
+
+        .s-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 17px;
+            font-weight: 400;
+            color: #3a3a3a;
+            margin-bottom: 6px;
+        }
+
+        .s-card p {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* === WISHES === */
+        .s-wish {
+            text-align: left;
+            padding: 16px 0;
+            border-bottom: 1px solid #ede8e3;
+        }
+
+        .s-wish:last-child {
+            border-bottom: none;
+        }
+
+        .s-wish strong {
+            display: block;
+            font-family: 'Playfair Display', serif;
+            font-size: 17px;
+            font-weight: 400;
+            color: #3a3a3a;
+            margin-bottom: 2px;
+        }
+
+        .s-wish span {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* === POEM === */
+        .s-poem {
+            font-style: italic;
+            color: #888;
+            font-size: clamp(15px, 3.8vw, 18px);
+            line-height: 2.2;
+            border-left: 2px solid #d4b896;
+            padding-left: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .s-poem p {
+            margin-bottom: 4px;
+        }
+
+        /* === STEPS === */
+        .s-steps {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .s-step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 18px 0;
+            border-bottom: 1px solid #ede8e3;
+        }
+
+        .s-step:last-child {
+            border-bottom: none;
+        }
+
+        .s-step-n {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1.5px solid #c17c74;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: #c17c74;
+        }
+
+        .s-step p {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        /* === FINALE EXTRAS === */
+        .finale-love {
+            margin-top: 36px;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: clamp(22px, 5vw, 34px);
+            color: #c17c74;
+        }
+
+        .finale-btn {
+            display: inline-block;
+            margin-top: 28px;
+            padding: 14px 44px;
+            background: #c17c74;
+            color: #fff;
+            border: none;
+            border-radius: 40px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(193, 124, 116, .25);
+            transition: background .3s, transform .3s;
+        }
+
+        .finale-btn:active {
+            transform: scale(.96);
+            background: #a96860;
+        }
+
+        /* === NAV BUTTON === */
+        .nav-btn {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 88px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            background: linear-gradient(to top, #faf7f4 60%, transparent);
+            pointer-events: none;
+        }
+
+        .nav-btn button {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 36px;
+            background: #fff;
+            border: 1.5px solid #ddd5cc;
+            border-radius: 40px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            color: #3a3a3a;
+            cursor: pointer;
+            transition: all .3s;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+            letter-spacing: 1px;
+        }
+
+        .nav-btn button:active {
+            transform: scale(.95);
+            background: #f5f0eb;
+        }
+
+        .nav-btn button svg {
+            width: 16px;
+            height: 16px;
+            stroke: #c17c74;
+            stroke-width: 2;
+            fill: none;
+            transition: transform .3s;
+        }
+
+        .nav-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .4s;
+        }
+
+        /* === PROGRESS === */
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #c17c74, #d4b896);
+            z-index: 200;
+            transition: width .5s ease;
+        }
+
+        /* === COUNTER (top right) === */
+        .counter {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            color: #ccc;
+            z-index: 200;
+            letter-spacing: 1px;
+        }
+
+        /* === MUSIC BTN === */
+        .music-btn {
+            position: fixed;
+            top: 14px;
+            left: 18px;
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border: 1.5px solid #ede8e3;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: box-shadow .3s;
+        }
+
+        .music-btn:active {
+            background: #f5f0eb;
+        }
+
+        /* === BACK BTN === */
+        .back-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border: 1.5px solid #ede8e3;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity .3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .back-btn.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .back-btn:active {
+            background: #f5f0eb;
+        }
+
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: #aaa;
+            stroke-width: 2;
+            fill: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="preloader" id="preloader">
+        <p>Одну секунду...</p>
+    </div>
+    <div class="petals" id="petals"></div>
+    <div class="confetti-wrap" id="confetti"></div>
+    <div class="progress" id="progress" style="width:0%"></div>
+    <div class="counter" id="counter"></div>
+
+    <!-- Music -->
+    <button class="music-btn" id="musicBtn" onclick="toggleMusic()">♪</button>
+
+    <!-- Back -->
+    <button class="back-btn" id="backBtn" onclick="prev()">
+        <svg viewBox="0 0 24 24">
+            <polyline points="15 18 9 12 15 6" />
+        </svg>
+    </button>
+
+    <!-- ======== SLIDES ======== -->
+    <div class="slides" id="slides">
+
+        <!-- 0: Hero -->
+        <div class="slide active" data-bg="#fdf6f0">
+            <div class="slide-inner">
+                <p class="s-date">10 ноября 2026</p>
+                <h1 class="s-title">С Днём Рождения, <em>мам</em></h1>
+                <p class="s-text">Я долго думал, как тебе сказать всё это. Решил написать — так проще собраться с
+                    мыслями.</p>
+                <p class="s-small">Нажми «дальше», чтобы читать</p>
+            </div>
+        </div>
+
+        <!-- 1: Intro -->
+        <div class="slide">
+            <div class="slide-inner">
+                <h2 class="s-title">Знаешь, я не часто <em>говорю</em> такие вещи вслух</h2>
+                <p class="s-text">Но сегодня твой день. И я хочу, чтобы ты знала — ты самый важный человек в моей жизни.
+                </p>
+                <p class="s-text">Ты та, к кому я всегда могу вернуться. Та, кто поймёт даже то, чего я сам не до конца
+                    понимаю.</p>
+            </div>
+        </div>
+
+        <!-- 2: Спасибо -->
+        <div class="slide">
+            <div class="slide-inner">
+                <h2 class="s-title">Спасибо тебе</h2>
+                <p class="s-text">За вещи, о которых я обычно забываю сказать.</p>
+                <ul class="s-list">
+                    <li>За то, что ты всегда рядом — даже когда я этого не заслуживаю</li>
+                    <li>За бессонные ночи, о которых я даже не знаю</li>
+                    <li>За еду, вкуснее которой нет нигде</li>
+                    <li>За «ты покушал?» — каждый раз</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 3: Спасибо (продолжение) -->
+        <div class="slide">
+            <div class="slide-inner">
+                <h2 class="s-title">И ещё <em>спасибо</em></h2>
+                <ul class="s-list">
+                    <li>За то, что веришь в меня сильнее, чем я сам</li>
+                    <li>За объятия, после которых всё становится нормально</li>
+                    <li>За терпение — его у тебя бесконечно</li>
+                    <li>За то, что ты просто есть</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 4: Моменты -->
+        <div class="slide">
+            <div class="slide-inner">
+                <h2 class="s-title">Вещи, которые я <em>запомнил</em></h2>
+                <p class="s-text">Маленькие моменты, которые для меня значат очень много.</p>
+                <div class="s-cards">
+                    <div class="s-card">
+                        <h3>Утренний запах</h3>
+                        <p>Когда просыпаешься, а дома уже пахнет завтраком. Это и есть ощущение дома.</p>
+                    </div>
+                    <div class="s-card">
+                        <h3>«Надень шапку»</h3>
+                        <p>За каждым таким словом — забота, которая никогда не заканчивается.</p>
+                    </div>
+                    <div class="s-card">
+                        <h3>Разговоры вечером</h3>
+                        <p>Когда мы просто сидим и болтаем ни о чём. Одни из лучших моментов.</p>
+                    </div>
+                    <div class="s-card">
+                        <h3>Твоя поддержка</h3>
+                        <p>В сложные моменты ты всегда находила нужные слова. Или просто обнимала.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5: Пожелания -->
+        <div class="slide">
+            <div class="slide-inner">
+                <h2 class="s-title">Что я тебе <em>желаю</em></h2>
+                <div class="s-wish">
+                    <strong>Здоровья</strong>
+                    <span>Крепкого. Настоящего. Чтобы силы были на всё, что ты хочешь.</span>
+                </div>
+                <div class="s-wish">
+                    <strong>Счастья</strong>
+                    <span>Не показного — а тихого, когда просто хорошо.</span>
+                </div>
+                <div class="s-wish">
+                    <strong>Спокойствия</strong>
+                    <span>Чтобы поменьше переживала и побольше радовалась.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6: Пожелания (продолжение) -->
+        <div class="slide">
+            <div class="slide-inner">
+                <div class="s-wish">
+                    <strong>Исполнения желаний</strong>
+                    <span>Пусть всё, о чём ты мечтаешь — даже тихо, про себя — обязательно сбудется.</span>
+                </div>
+                <div class="s-wish">
+                    <strong>Улыбок</strong>
+                    <span>Побольше поводов улыбаться. Ты заслуживаешь этого каждый день.</span>
+                </div>
+                <div class="s-wish">
+                    <strong>Любви</strong>
+                    <span>Чтобы ты всегда чувствовала, как сильно мы тебя любим.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7: Стихи -->
+        <div class="slide">
+            <div class="slide-inner">
+                <h2 class="s-title">Несколько строк <em>для тебя</em></h2>
+                <div class="s-poem">
+                    <p>Ты — мой свет в окне ночном,</p>
+                    <p>Ты — тепло в родимом доме,</p>
+                    <p>Ты — мой самый верный друг,</p>
+                    <p>Лучше мамы нет вокруг.</p>
+                    <p style="margin-top:14px">Пусть судьба тебе подарит</p>
+                    <p>Всё, чего душа желает,</p>
+                    <p>С днём рождения, родная —</p>
+                    <p>Мама лучшая, я знаю.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9: Финал -->
+        <div class="slide" data-finale="true">
+            <div class="slide-inner">
+                <h2 class="s-title">Мам, выйди в <em>тамбур</em></h2>
+                <p class="s-text">Там тебя ждёт сюрприз.</p>
+                <button class="finale-btn" onclick="boom()">Иду!</button>
+                <p class="finale-love">Люблю тебя.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-btn" id="navBtn">
+        <button onclick="next()">
+            Дальше
+            <svg viewBox="0 0 24 24">
+                <polyline points="9 6 15 12 9 18" />
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        // --- State ---
+        let current = 0;
+        const slides = document.querySelectorAll('.slide');
+        const total = slides.length;
+        let transitioning = false;
+
+        function updateUI() {
+            // progress
+            document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
+            // counter
+            document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+            // back btn
+            document.getElementById('backBtn').classList.toggle('show', current > 0);
+            // nav btn — hide on last slide
+            document.getElementById('navBtn').classList.toggle('hidden', current === total - 1);
+        }
+
+        function goTo(idx) {
+            if (idx < 0 || idx >= total || transitioning) return;
+            transitioning = true;
+
+            const dir = idx > current ? 'exit-up' : '';
+            slides[current].classList.remove('active');
+            if (dir) slides[current].classList.add(dir);
+
+            slides[idx].classList.add('active');
+            slides[idx].scrollTop = 0;
+            current = idx;
+            updateUI();
+
+            // confetti on finale
+            if (slides[current].dataset.finale) setTimeout(boom, 400);
+
+            setTimeout(() => {
+                slides.forEach(s => s.classList.remove('exit-up'));
+                transitioning = false;
+            }, 600);
+        }
+
+        function next() { goTo(current + 1); }
+        function prev() { goTo(current - 1); }
+
+        // --- Swipe ---
+        let touchY = 0;
+        document.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
+        document.addEventListener('touchend', e => {
+            const dy = touchY - e.changedTouches[0].clientY;
+            if (Math.abs(dy) > 50) {
+                dy > 0 ? next() : prev();
+            }
+        }, { passive: true });
+
+        // --- Keyboard ---
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+        });
+
+        // --- Preloader ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('preloader').classList.add('gone');
+                startPetals();
+                updateUI();
+            }, 1200);
+        });
+
+        // --- Petals ---
+        function startPetals() {
+            const c = document.getElementById('petals');
+            setInterval(() => {
+                const p = document.createElement('div');
+                p.className = 'petal';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.animationDuration = (9 + Math.random() * 6) + 's';
+                p.style.animationDelay = Math.random() * 2 + 's';
+                const h = 340 + Math.random() * 30;
+                p.style.background = `radial-gradient(ellipse,hsl(${h},55%,80%) 30%,transparent 70%)`;
+                const sz = 7 + Math.random() * 9;
+                p.style.width = sz + 'px'; p.style.height = sz + 'px';
+                c.appendChild(p);
+                setTimeout(() => p.remove(), 16000);
+            }, 1400);
+        }
+
+        // --- Confetti ---
+        function boom() {
+            const c = document.getElementById('confetti');
+            const cols = ['#c17c74', '#d4b896', '#e8b4b8', '#b8860b', '#a3c4bc', '#f0d9c4', '#7c9885'];
+            for (let i = 0; i < 80; i++) {
+                setTimeout(() => {
+                    const d = document.createElement('div');
+                    d.className = 'conf';
+                    d.style.left = Math.random() * 100 + 'vw';
+                    d.style.background = cols[Math.floor(Math.random() * cols.length)];
+                    d.style.animationDuration = (2 + Math.random() * 2) + 's';
+                    d.style.animationDelay = Math.random() * .3 + 's';
+                    d.style.width = (5 + Math.random() * 6) + 'px';
+                    d.style.height = (8 + Math.random() * 10) + 'px';
+                    d.style.borderRadius = Math.random() > .5 ? '50%' : '1px';
+                    c.appendChild(d);
+                    setTimeout(() => d.remove(), 5000);
+                }, i * 25);
+            }
+        }
+
+        // --- Music ---
+        let playing = false, ctx, iv;
+        function toggleMusic() {
+            const b = document.getElementById('musicBtn');
+            if (!playing) {
+                ctx = new (window.AudioContext || window.webkitAudioContext)();
+                playM(); b.textContent = '♫'; playing = true;
+            } else {
+                clearInterval(iv); ctx.close();
+                b.textContent = '♪'; playing = false;
+            }
+        }
+        function nt(f, t, d) {
+            const o = ctx.createOscillator(), g = ctx.createGain();
+            o.connect(g); g.connect(ctx.destination);
+            o.type = 'sine'; o.frequency.value = f;
+            g.gain.setValueAtTime(0, t);
+            g.gain.linearRampToValueAtTime(.07, t + .04);
+            g.gain.linearRampToValueAtTime(0, t + d);
+            o.start(t); o.stop(t + d);
+        }
+        function playM() {
+            const m = [[264, .3], [264, .15], [297, .5], [264, .5], [352, .5], [330, .8], [264, .3], [264, .15], [297, .5], [264, .5], [396, .5], [352, .8], [264, .3], [264, .15], [528, .5], [440, .5], [352, .5], [330, .5], [297, .8], [470, .3], [470, .15], [440, .5], [352, .5], [396, .5], [352, .8]];
+            let t = ctx.currentTime + .1;
+            m.forEach(([f, d]) => { nt(f, t, d); t += d + .05; });
+            const tot = m.reduce((s, [, d]) => s + d + .05, 0);
+            iv = setInterval(() => {
+                let t2 = ctx.currentTime + .1;
+                m.forEach(([f, d]) => { nt(f, t2, d); t2 += d + .05; });
+            }, tot * 1000 + 1200);
+        }
+    </script>
+
+</body>
+
+</html>
